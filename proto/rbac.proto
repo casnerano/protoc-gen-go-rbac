@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package protoc_gen_go_rbac;
+
+option go_package = "github.com/casnerano/protoc-gen-go-rbac/proto;rbac";
+
+import "google/protobuf/descriptor.proto";
+
+enum AccessLevel {
+  ACCESS_LEVEL_UNKNOWN = 0;
+  ACCESS_LEVEL_PUBLIC = 1;
+  ACCESS_LEVEL_PRIVATE = 2;
+}
+
+message Rules {
+  AccessLevel access_level = 1;
+  repeated string allowed_roles = 2;
+}
+
+extend google.protobuf.ServiceOptions {
+  Rules service_rules = 50001;
+}
+
+extend google.protobuf.MethodOptions {
+  Rules method_rules = 50002;
+}
