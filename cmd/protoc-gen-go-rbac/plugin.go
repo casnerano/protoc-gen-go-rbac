@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -21,7 +22,7 @@ var templateFS embed.FS
 
 type TemplateData struct {
 	Meta     Meta
-	Package  Package
+	File     File
 	Services []Service
 }
 
@@ -30,9 +31,10 @@ type Meta struct {
 	ProtocVersion string
 }
 
-type Package struct {
-	Name   string
-	Source string
+type File struct {
+	Name    string
+	Package string
+	Source  string
 }
 
 type Service struct {
@@ -72,15 +74,15 @@ func execute(plugin *protogen.Plugin) error {
 				}(),
 				ModuleVersion: "(unknown)",
 			},
-			Package: Package{
-				Name:   string(file.GoPackageName),
-				Source: file.Desc.Path(),
+			File: File{
+				Name:    filepath.Base(file.GeneratedFilenamePrefix),
+				Package: string(file.GoPackageName),
+				Source:  file.Desc.Path(),
 			},
 			Services: services,
 		}
 
 		filename := file.GeneratedFilenamePrefix + outputFileSuffix
-
 		if err = tmpl.Execute(plugin.NewGeneratedFile(filename, file.GoImportPath), templateData); err != nil {
 			return fmt.Errorf("failed execute template: %w", err)
 		}
@@ -93,10 +95,10 @@ func collectServices(protoServices []*protogen.Service) []Service {
 	var services []Service
 	for _, protoService := range protoServices {
 		if options := protoService.Desc.Options().(*descriptorpb.ServiceOptions); options != nil {
-			if extension := proto.GetExtension(options, rbac.E_ServiceRules); extension != nil {
+			if serviceRules := proto.GetExtension(options, rbac.E_ServiceRules).(*rbac.Rules); serviceRules != nil {
 				services = append(services, Service{
 					Name:    string(protoService.Desc.Name()),
-					Rules:   extension.(*rbac.Rules),
+					Rules:   serviceRules,
 					Methods: collectMethods(protoService.Methods),
 				})
 			}
@@ -110,10 +112,10 @@ func collectMethods(protoMethods []*protogen.Method) []Method {
 	var methods []Method
 	for _, protoMethod := range protoMethods {
 		if options := protoMethod.Desc.Options().(*descriptorpb.MethodOptions); options != nil {
-			if extension := proto.GetExtension(options, rbac.E_MethodRules); extension != nil {
+			if methodRules := proto.GetExtension(options, rbac.E_MethodRules).(*rbac.Rules); methodRules != nil {
 				methods = append(methods, Method{
 					Name:  string(protoMethod.Desc.Name()),
-					Rules: extension.(*rbac.Rules),
+					Rules: methodRules,
 				})
 			}
 		}

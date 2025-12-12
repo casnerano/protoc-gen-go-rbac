@@ -146,3 +146,91 @@ var ExampleService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "example/api/service.proto",
 }
+
+// ExampleServiceExtClient is the client API for ExampleServiceExt service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type ExampleServiceExtClient interface {
+	// Метод наследует правила сервиса.
+	StatExt(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
+}
+
+type exampleServiceExtClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewExampleServiceExtClient(cc grpc.ClientConnInterface) ExampleServiceExtClient {
+	return &exampleServiceExtClient{cc}
+}
+
+func (c *exampleServiceExtClient) StatExt(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/example.ExampleServiceExt/StatExt", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ExampleServiceExtServer is the server API for ExampleServiceExt service.
+// All implementations must embed UnimplementedExampleServiceExtServer
+// for forward compatibility
+type ExampleServiceExtServer interface {
+	// Метод наследует правила сервиса.
+	StatExt(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	mustEmbedUnimplementedExampleServiceExtServer()
+}
+
+// UnimplementedExampleServiceExtServer must be embedded to have forward compatible implementations.
+type UnimplementedExampleServiceExtServer struct {
+}
+
+func (UnimplementedExampleServiceExtServer) StatExt(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StatExt not implemented")
+}
+func (UnimplementedExampleServiceExtServer) mustEmbedUnimplementedExampleServiceExtServer() {}
+
+// UnsafeExampleServiceExtServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ExampleServiceExtServer will
+// result in compilation errors.
+type UnsafeExampleServiceExtServer interface {
+	mustEmbedUnimplementedExampleServiceExtServer()
+}
+
+func RegisterExampleServiceExtServer(s grpc.ServiceRegistrar, srv ExampleServiceExtServer) {
+	s.RegisterService(&ExampleServiceExt_ServiceDesc, srv)
+}
+
+func _ExampleServiceExt_StatExt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExampleServiceExtServer).StatExt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/example.ExampleServiceExt/StatExt",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExampleServiceExtServer).StatExt(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// ExampleServiceExt_ServiceDesc is the grpc.ServiceDesc for ExampleServiceExt service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ExampleServiceExt_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "example.ExampleServiceExt",
+	HandlerType: (*ExampleServiceExtServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "StatExt",
+			Handler:    _ExampleServiceExt_StatExt_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "example/api/service.proto",
+}

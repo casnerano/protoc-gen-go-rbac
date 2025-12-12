@@ -11,7 +11,7 @@ build-protoc-gen-go-rbac:
 	go build -o ${LOCAL_BIN}/protoc-gen-go-rbac ./cmd/protoc-gen-go-rbac
 
 .PHONY: generate
-generate: download-bin-deps build-protoc-gen-go-rbac
+generate: download-bin-deps
 	$(LOCAL_BIN)/buf generate
 	go mod tidy
 

@@ -2,20 +2,19 @@
 // versions:
 // - protoc-gen-go-grpc {{ .Meta.ModuleVersion }}
 // - protoc             {{ .Meta.ProtocVersion }}
-// source: {{ .Package.Source }}
+// source: {{ .File.Source }}
 
-package {{ .Package.Name }}
+package {{ .File.Package }}
 
 import (
     "github.com/casnerano/protoc-gen-go-rbac/pkg/rbac"
     desc "github.com/casnerano/protoc-gen-go-rbac/proto"
 )
 
-var accessServices = map[string]rbac.AccessService{
-    {{- range .Services }}
-    "{{ .Name }}": {
+{{- range .Services }}
+    var rbac{{ .Name }} = rbac.Service{
         {{- if .Rules }}
-            Rules: &rbac.AccessRules{
+            Rules: &rbac.Rules{
                 AccessLevel: desc.AccessLevel_{{ .Rules.AccessLevel }},
                 {{- if .Rules.AllowedRoles }}
                 AllowedRoles: []string{
@@ -28,10 +27,10 @@ var accessServices = map[string]rbac.AccessService{
         {{- else }}
             Rules: nil,
         {{- end }}
-        Methods: map[string]rbac.AccessMethod{
+        Methods: map[string]rbac.Method{
             {{- range .Methods }}
             "{{ .Name }}": {
-                Rules: &rbac.AccessRules{
+                Rules: &rbac.Rules{
                     AccessLevel: desc.AccessLevel_{{ .Rules.AccessLevel }},
                     {{- if .Rules.AllowedRoles }}
                     AllowedRoles: []string{
@@ -44,13 +43,10 @@ var accessServices = map[string]rbac.AccessService{
             },
             {{- end }}
         },
-    },
-    {{- end }}
-}
+    }
 
-{{- range .Services }}
-    func (Unimplemented{{ .Name }}Server) CheckRolesAccess(fullMethod string, roles []string) bool {
-        return rbac.CheckRolesAccess(accessServices, fullMethod, roles)
+    func (Unimplemented{{ .Name }}Server) CheckAccess(fullMethod string, roles []string) bool {
+        return rbac.CheckAccess(&rbac{{ .Name }}, fullMethod, roles)
     }
 {{- end }}
 

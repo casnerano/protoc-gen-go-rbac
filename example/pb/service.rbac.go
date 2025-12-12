@@ -11,25 +11,34 @@ import (
 	desc "github.com/casnerano/protoc-gen-go-rbac/proto"
 )
 
-var accessServices = map[string]rbac.AccessService{
-	"ExampleService": {
-		Rules: &rbac.AccessRules{
-			AccessLevel: desc.AccessLevel_ACCESS_LEVEL_PUBLIC,
-		},
-		Methods: map[string]rbac.AccessMethod{
-			"Update": {
-				Rules: &rbac.AccessRules{
-					AccessLevel: desc.AccessLevel_ACCESS_LEVEL_PRIVATE,
-					AllowedRoles: []string{
-						"manager",
-						"director",
-					},
+var rbacExampleService = rbac.Service{
+	Rules: &rbac.Rules{
+		AccessLevel: desc.AccessLevel_ACCESS_LEVEL_PUBLIC,
+	},
+	Methods: map[string]rbac.Method{
+		"Update": {
+			Rules: &rbac.Rules{
+				AccessLevel: desc.AccessLevel_ACCESS_LEVEL_PRIVATE,
+				AllowedRoles: []string{
+					"manager",
+					"director",
 				},
 			},
 		},
 	},
 }
 
-func (UnimplementedExampleServiceServer) CheckRolesAccess(fullMethod string, roles []string) bool {
-	return rbac.CheckRolesAccess(accessServices, fullMethod, roles)
+func (UnimplementedExampleServiceServer) CheckAccess(fullMethod string, roles []string) bool {
+	return rbac.CheckAccess(&rbacExampleService, fullMethod, roles)
+}
+
+var rbacExampleServiceExt = rbac.Service{
+	Rules: &rbac.Rules{
+		AccessLevel: desc.AccessLevel_ACCESS_LEVEL_PUBLIC,
+	},
+	Methods: map[string]rbac.Method{},
+}
+
+func (UnimplementedExampleServiceExtServer) CheckAccess(fullMethod string, roles []string) bool {
+	return rbac.CheckAccess(&rbacExampleServiceExt, fullMethod, roles)
 }

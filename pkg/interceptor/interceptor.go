@@ -10,11 +10,11 @@ import (
 
 const msgAccessDenied = "access denied"
 
-type rolesAccessChecker interface {
-	CheckRolesAccess(fullMethod string, roles []string) bool
+type accessChecker interface {
+	CheckAccess(fullMethod string, roles []string) bool
 }
 
-type rolesProvider interface {
+type roleGetter interface {
 	Roles() []string
 }
 
@@ -22,7 +22,7 @@ type rolesAccessorOptions struct{}
 
 type Option func(*rolesAccessorOptions)
 
-func RolesAccessor(rolesProvider rolesProvider, opts ...Option) grpc.UnaryServerInterceptor {
+func RolesAccessor(roleGetter roleGetter, opts ...Option) grpc.UnaryServerInterceptor {
 	options := &rolesAccessorOptions{}
 
 	for _, opt := range opts {
@@ -31,8 +31,8 @@ func RolesAccessor(rolesProvider rolesProvider, opts ...Option) grpc.UnaryServer
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
 		switch v := info.Server.(type) {
-		case rolesAccessChecker:
-			if v.CheckRolesAccess(info.FullMethod, rolesProvider.Roles()) {
+		case accessChecker:
+			if v.CheckAccess(info.FullMethod, roleGetter.Roles()) {
 				return handler(ctx, req)
 			}
 		}
