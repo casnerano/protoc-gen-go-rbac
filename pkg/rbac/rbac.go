@@ -4,21 +4,17 @@ import (
 	"path"
 	"strings"
 
-	rbac "github.com/casnerano/protoc-gen-go-rbac/proto"
+	desc "github.com/casnerano/protoc-gen-go-rbac/proto"
 )
 
-type Rules struct {
-	AccessLevel  rbac.AccessLevel
-	AllowedRoles []string
-}
-
 type Service struct {
-	Rules   *Rules
-	Methods map[string]Method
+	Name    string
+	Rules   *desc.Rules
+	Methods map[string]*Method
 }
 
 type Method struct {
-	Rules *Rules
+	Rules *desc.Rules
 }
 
 func CheckAccess(service *Service, fullMethod string, roles []string) bool {
@@ -28,11 +24,11 @@ func CheckAccess(service *Service, fullMethod string, roles []string) bool {
 	return hasRolesAccess(service.Rules, roles)
 }
 
-func hasRolesAccess(rules *Rules, roles []string) bool {
+func hasRolesAccess(rules *desc.Rules, roles []string) bool {
 	switch rules.AccessLevel {
-	case rbac.AccessLevel_ACCESS_LEVEL_PUBLIC:
+	case desc.AccessLevel_ACCESS_LEVEL_PUBLIC:
 		return true
-	case rbac.AccessLevel_ACCESS_LEVEL_PRIVATE:
+	case desc.AccessLevel_ACCESS_LEVEL_PRIVATE:
 		for _, role := range roles {
 			role = strings.ToLower(role)
 			for _, allowed := range rules.AllowedRoles {

@@ -14,7 +14,7 @@ import (
 {{- range .Services }}
     var rbac{{ .Name }} = rbac.Service{
         {{- if .Rules }}
-            Rules: &rbac.Rules{
+            Rules: &desc.Rules{
                 AccessLevel: desc.AccessLevel_{{ .Rules.AccessLevel }},
                 {{- if .Rules.AllowedRoles }}
                 AllowedRoles: []string{
@@ -27,14 +27,14 @@ import (
         {{- else }}
             Rules: nil,
         {{- end }}
-        Methods: map[string]rbac.Method{
-            {{- range .Methods }}
-            "{{ .Name }}": {
-                Rules: &rbac.Rules{
-                    AccessLevel: desc.AccessLevel_{{ .Rules.AccessLevel }},
-                    {{- if .Rules.AllowedRoles }}
+        Methods: map[string]*rbac.Method{
+            {{- range $name, $method := .Methods }}
+            "{{ $name }}": {
+                Rules: &desc.Rules{
+                    AccessLevel: desc.AccessLevel_{{ $method.Rules.AccessLevel }},
+                    {{- if $method.Rules.AllowedRoles }}
                     AllowedRoles: []string{
-                        {{- range $j, $role := .Rules.AllowedRoles }}
+                        {{- range $j, $role := $method.Rules.AllowedRoles }}
                         "{{ $role | toLower }}",
                         {{- end }}
                     },

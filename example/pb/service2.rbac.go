@@ -12,10 +12,10 @@ import (
 )
 
 var rbacExampleService2 = rbac.Service{
-	Rules: &rbac.Rules{
+	Rules: &desc.Rules{
 		AccessLevel: desc.AccessLevel_ACCESS_LEVEL_PUBLIC,
 	},
-	Methods: map[string]rbac.Method{},
+	Methods: map[string]*rbac.Method{},
 }
 
 func (UnimplementedExampleService2Server) CheckAccess(fullMethod string, roles []string) bool {

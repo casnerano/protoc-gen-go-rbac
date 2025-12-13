@@ -7,7 +7,8 @@ import (
 	"strings"
 	"text/template"
 
-	rbac "github.com/casnerano/protoc-gen-go-rbac/proto"
+	"github.com/casnerano/protoc-gen-go-rbac/pkg/rbac"
+	desc "github.com/casnerano/protoc-gen-go-rbac/proto"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
@@ -23,7 +24,9 @@ var templateFS embed.FS
 type TemplateData struct {
 	Meta     Meta
 	File     File
-	Services []Service
+	Services []*rbac.Service
+
+	Test string
 }
 
 type Meta struct {
@@ -35,17 +38,6 @@ type File struct {
 	Name    string
 	Package string
 	Source  string
-}
-
-type Service struct {
-	Name    string
-	Rules   *rbac.Rules
-	Methods []Method
-}
-
-type Method struct {
-	Name  string
-	Rules *rbac.Rules
 }
 
 func execute(plugin *protogen.Plugin) error {
@@ -80,6 +72,7 @@ func execute(plugin *protogen.Plugin) error {
 				Source:  file.Desc.Path(),
 			},
 			Services: services,
+			Test:     fmt.Sprintf("%#v", services),
 		}
 
 		filename := file.GeneratedFilenamePrefix + outputFileSuffix
@@ -91,12 +84,12 @@ func execute(plugin *protogen.Plugin) error {
 	return nil
 }
 
-func collectServices(protoServices []*protogen.Service) []Service {
-	var services []Service
+func collectServices(protoServices []*protogen.Service) []*rbac.Service {
+	var services []*rbac.Service
 	for _, protoService := range protoServices {
 		if options := protoService.Desc.Options().(*descriptorpb.ServiceOptions); options != nil {
-			if serviceRules := proto.GetExtension(options, rbac.E_ServiceRules).(*rbac.Rules); serviceRules != nil {
-				services = append(services, Service{
+			if serviceRules := proto.GetExtension(options, desc.E_ServiceRules).(*desc.Rules); serviceRules != nil {
+				services = append(services, &rbac.Service{
 					Name:    string(protoService.Desc.Name()),
 					Rules:   serviceRules,
 					Methods: collectMethods(protoService.Methods),
@@ -108,15 +101,15 @@ func collectServices(protoServices []*protogen.Service) []Service {
 	return services
 }
 
-func collectMethods(protoMethods []*protogen.Method) []Method {
-	var methods []Method
+func collectMethods(protoMethods []*protogen.Method) map[string]*rbac.Method {
+	methods := make(map[string]*rbac.Method)
+
 	for _, protoMethod := range protoMethods {
 		if options := protoMethod.Desc.Options().(*descriptorpb.MethodOptions); options != nil {
-			if methodRules := proto.GetExtension(options, rbac.E_MethodRules).(*rbac.Rules); methodRules != nil {
-				methods = append(methods, Method{
-					Name:  string(protoMethod.Desc.Name()),
+			if methodRules := proto.GetExtension(options, desc.E_MethodRules).(*desc.Rules); methodRules != nil {
+				methods[string(protoMethod.Desc.Name())] = &rbac.Method{
 					Rules: methodRules,
-				})
+				}
 			}
 		}
 	}
