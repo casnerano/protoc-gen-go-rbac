@@ -15,7 +15,7 @@ service ExampleService {
   };
 
   // Метод наследует правила сервиса.
-  rpc Stat(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc Stats(google.protobuf.Empty) returns (google.protobuf.Empty);
 
   // Метод переопределяет уровень доступа сервиса,
   // и устанавливает его открытым для определенных ролей.
