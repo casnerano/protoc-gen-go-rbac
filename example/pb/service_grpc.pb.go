@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ExampleServiceClient interface {
 	// Метод наследует правила сервиса.
-	Stat(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Stats(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// Метод переопределяет уровень доступа сервиса,
 	// и устанавливает его открытым для определенных ролей.
 	Update(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -38,9 +38,9 @@ func NewExampleServiceClient(cc grpc.ClientConnInterface) ExampleServiceClient {
 	return &exampleServiceClient{cc}
 }
 
-func (c *exampleServiceClient) Stat(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *exampleServiceClient) Stats(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/example.ExampleService/Stat", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/example.ExampleService/Stats", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (c *exampleServiceClient) Update(ctx context.Context, in *emptypb.Empty, op
 // for forward compatibility
 type ExampleServiceServer interface {
 	// Метод наследует правила сервиса.
-	Stat(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	Stats(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	// Метод переопределяет уровень доступа сервиса,
 	// и устанавливает его открытым для определенных ролей.
 	Update(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
@@ -72,8 +72,8 @@ type ExampleServiceServer interface {
 type UnimplementedExampleServiceServer struct {
 }
 
-func (UnimplementedExampleServiceServer) Stat(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Stat not implemented")
+func (UnimplementedExampleServiceServer) Stats(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Stats not implemented")
 }
 func (UnimplementedExampleServiceServer) Update(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
@@ -91,20 +91,20 @@ func RegisterExampleServiceServer(s grpc.ServiceRegistrar, srv ExampleServiceSer
 	s.RegisterService(&ExampleService_ServiceDesc, srv)
 }
 
-func _ExampleService_Stat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ExampleService_Stats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ExampleServiceServer).Stat(ctx, in)
+		return srv.(ExampleServiceServer).Stats(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/example.ExampleService/Stat",
+		FullMethod: "/example.ExampleService/Stats",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExampleServiceServer).Stat(ctx, req.(*emptypb.Empty))
+		return srv.(ExampleServiceServer).Stats(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -135,8 +135,8 @@ var ExampleService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ExampleServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Stat",
-			Handler:    _ExampleService_Stat_Handler,
+			MethodName: "Stats",
+			Handler:    _ExampleService_Stats_Handler,
 		},
 		{
 			MethodName: "Update",
