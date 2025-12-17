@@ -88,13 +88,18 @@ func collectServices(protoServices []*protogen.Service) []*rbac.Service {
 	var services []*rbac.Service
 	for _, protoService := range protoServices {
 		if options := protoService.Desc.Options().(*descriptorpb.ServiceOptions); options != nil {
-			if serviceRules := proto.GetExtension(options, desc.E_ServiceRules).(*desc.Rules); serviceRules != nil {
-				services = append(services, &rbac.Service{
-					Name:    string(protoService.Desc.Name()),
-					Rules:   serviceRules,
-					Methods: collectMethods(protoService.Methods),
-				})
+			serviceRules := proto.GetExtension(options, desc.E_ServiceRules).(*desc.Rules)
+			methods := collectMethods(protoService.Methods)
+
+			if serviceRules != nil && len(methods) == 0 {
+				continue
 			}
+
+			services = append(services, &rbac.Service{
+				Name:    string(protoService.Desc.Name()),
+				Rules:   serviceRules,
+				Methods: methods,
+			})
 		}
 	}
 

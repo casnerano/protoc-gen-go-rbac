@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc (unknown)
 // - protoc             (unknown)
-// source: example/api/service2.proto
+// source: example/api/service_two.proto
 
 package pb
 
@@ -11,13 +11,13 @@ import (
 	desc "github.com/casnerano/protoc-gen-go-rbac/proto"
 )
 
-var rbacExampleService2 = rbac.Service{
+var rbacExampleServiceTwo = rbac.Service{
 	Rules: &desc.Rules{
-		AccessLevel: desc.AccessLevel_ACCESS_LEVEL_PUBLIC,
+		AccessLevel: desc.AccessLevel_ACCESS_LEVEL_PRIVATE,
 	},
 	Methods: map[string]*rbac.Method{},
 }
 
-func (UnimplementedExampleService2Server) CheckAccess(fullMethod string, roles []string) bool {
-	return rbac.CheckAccess(&rbacExampleService2, fullMethod, roles)
+func (UnimplementedExampleServiceTwoServer) CheckAccess(fullMethod string, roles []string) bool {
+	return rbac.CheckAccess(&rbacExampleServiceTwo, fullMethod, roles)
 }

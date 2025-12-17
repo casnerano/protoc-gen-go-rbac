@@ -1,7 +1,7 @@
 LOCAL_BIN := $(CURDIR)/bin
-VENDOR_PROTO_DIR := $(CURDIR)/vendor.protogen
+PROTO_DIR := $(CURDIR)/proto
 EXAMPLE_DIR := $(CURDIR)/example
-
+VENDOR_PROTO_DIR := $(CURDIR)/vendor.protogen
 MODULE := github.com/casnerano/protoc-gen-go-rbac
 
 .PHONY: download-bin-deps

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package example;
+
+option go_package = "github.com/casnerano/protoc-gen-go-rbac/example/pb";
+
+import "google/protobuf/empty.proto";
+import "proto/rbac.proto";
+
+service ExampleServiceTwo {
+  option (protoc_gen_go_rbac.service_rules) = {
+    access_level: ACCESS_LEVEL_PRIVATE,
+  };
+
+  rpc Stats(google.protobuf.Empty) returns (google.protobuf.Empty);
+}
+
+service ExampleServiceThree {
+  rpc Stats(google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (protoc_gen_go_rbac.method_rules) = {
+      access_level: ACCESS_LEVEL_PRIVATE,
+      allowed_roles: ["admin"]
+    };
+  };
+}
