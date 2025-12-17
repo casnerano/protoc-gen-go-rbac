@@ -1,4 +1,8 @@
 LOCAL_BIN := $(CURDIR)/bin
+VENDOR_PROTO_DIR := $(CURDIR)/vendor.protogen
+EXAMPLE_DIR := $(CURDIR)/example
+
+MODULE := github.com/casnerano/protoc-gen-go-rbac
 
 .PHONY: download-bin-deps
 download-bin-deps:
@@ -20,3 +24,17 @@ clean:
 	rm -rf $(LOCAL_BIN)
 	rm -rf $(CURDIR)/proto/*.pb.go
 	rm -rf $(CURDIR)/example/pb/*.pb.go
+
+.PHONY: vendor.protogen/google/api
+vendor.protogen/google/api:
+	@if [ ! -d "$(VENDOR_PROTO_DIR)/google/api" ]; then \
+		echo "Vendoring google/api from googleapis..."; \
+		git clone -b master --single-branch -n --depth=1 --filter=tree:0 https://github.com/googleapis/googleapis "$(VENDOR_PROTO_DIR)/googleapis" && \
+		cd "$(VENDOR_PROTO_DIR)/googleapis" && git sparse-checkout set --no-cone google/api && git checkout; \
+		mkdir -p "$(VENDOR_PROTO_DIR)/google"; \
+		mv "$(VENDOR_PROTO_DIR)/googleapis/google/api" "$(VENDOR_PROTO_DIR)/google/"; \
+		rm -rf "$(VENDOR_PROTO_DIR)/googleapis"; \
+	fi
+
+.PHONY: vendor.protogen
+vendor.protogen: vendor.protogen/google/api
