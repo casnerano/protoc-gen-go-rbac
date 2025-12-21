@@ -2,6 +2,7 @@ package interceptor
 
 import (
 	"context"
+	"log/slog"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -10,7 +11,7 @@ import (
 
 const msgAccessDenied = "access denied"
 
-type accessChecker interface {
+type checkable interface {
 	CheckAccess(fullMethod string, roles []string) bool
 }
 
@@ -18,23 +19,50 @@ type roleGetter interface {
 	Roles() []string
 }
 
-type rolesAccessorOptions struct{}
+type options struct {
+	debug bool
+}
 
-type Option func(*rolesAccessorOptions)
+type Option func(*options)
+
+func WithDebug() Option {
+	return func(options *options) {
+		options.debug = true
+	}
+}
 
 func RolesAccessor(roleGetter roleGetter, opts ...Option) grpc.UnaryServerInterceptor {
-	options := &rolesAccessorOptions{}
+	rbacOptions := &options{}
 
 	for _, opt := range opts {
-		opt(options)
+		opt(rbacOptions)
 	}
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
+		if rbacOptions.debug {
+			slog.WarnContext(ctx, "RBAC: interceptor invoked",
+				slog.String("method", info.FullMethod),
+				slog.Any("user_roles", roleGetter.Roles()),
+			)
+		}
+
 		switch v := info.Server.(type) {
-		case accessChecker:
-			if v.CheckAccess(info.FullMethod, roleGetter.Roles()) {
+		case checkable:
+			hasAccess := v.CheckAccess(info.FullMethod, roleGetter.Roles())
+
+			if rbacOptions.debug {
+				slog.WarnContext(ctx, "RBAC: the rules for the method access",
+					slog.Bool("has_access", hasAccess),
+				)
+			}
+
+			if hasAccess {
 				return handler(ctx, req)
 			}
+		}
+
+		if rbacOptions.debug {
+			slog.WarnContext(ctx, "RBAC: rules for the method are not defined")
 		}
 
 		return nil, status.Error(codes.PermissionDenied, msgAccessDenied)
