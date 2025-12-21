@@ -9,12 +9,15 @@ import "google/protobuf/descriptor.proto";
 enum AccessLevel {
   ACCESS_LEVEL_UNKNOWN = 0;
   ACCESS_LEVEL_PUBLIC = 1;
-  ACCESS_LEVEL_PRIVATE = 2;
+  ACCESS_LEVEL_AUTHENTICATED = 2;
+  ACCESS_LEVEL_PRIVATE = 3;
+  ACCESS_LEVEL_POLICY = 4;
 }
 
 message Rules {
   AccessLevel access_level = 1;
   repeated string allowed_roles = 2;
+  optional string policy_name = 3;
 }
 
 extend google.protobuf.ServiceOptions {
