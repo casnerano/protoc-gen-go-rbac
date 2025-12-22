@@ -11,6 +11,7 @@ import (
 )
 
 var rbacExampleServiceTwo = rbac.Service{
+	Name: "ExampleServiceTwo",
 	Rules: &rbac.Rules{
 		AccessLevel: 3,
 	},
@@ -19,4 +20,23 @@ var rbacExampleServiceTwo = rbac.Service{
 
 func (UnimplementedExampleServiceTwoServer) CheckAccess(fullMethod string, roles []string) bool {
 	return rbac.CheckAccess(&rbacExampleServiceTwo, fullMethod, roles)
+}
+
+var rbacExampleServiceThree = rbac.Service{
+	Name:  "ExampleServiceThree",
+	Rules: nil,
+	Methods: map[string]*rbac.Method{
+		"Stats": {
+			Rules: &rbac.Rules{
+				AccessLevel: 3,
+				AllowedRoles: []string{
+					"admin",
+				},
+			},
+		},
+	},
+}
+
+func (UnimplementedExampleServiceThreeServer) CheckAccess(fullMethod string, roles []string) bool {
+	return rbac.CheckAccess(&rbacExampleServiceThree, fullMethod, roles)
 }

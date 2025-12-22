@@ -11,6 +11,7 @@ import (
 )
 
 var rbacExampleServiceOne = rbac.Service{
+	Name: "ExampleServiceOne",
 	Rules: &rbac.Rules{
 		AccessLevel: 1,
 	},

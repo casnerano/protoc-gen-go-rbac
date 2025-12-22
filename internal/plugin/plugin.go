@@ -87,11 +87,11 @@ func Execute(plugin *protogen.Plugin) error {
 func collectServices(protoServices []*protogen.Service) []*rbac.Service {
 	var services []*rbac.Service
 	for _, protoService := range protoServices {
-		if options := protoService.Desc.Options().(*descriptorpb.ServiceOptions); options != nil {
-			service := rbac.Service{
-				Name: string(protoService.Desc.Name()),
-			}
+		service := rbac.Service{
+			Name: string(protoService.Desc.Name()),
+		}
 
+		if options := protoService.Desc.Options().(*descriptorpb.ServiceOptions); options != nil {
 			if rules := proto.GetExtension(options, desc.E_ServiceRules).(*desc.Rules); rules != nil {
 				service.Rules = &rbac.Rules{
 					AccessLevel:  rbac.AccessLevel(rules.AccessLevel),
@@ -99,17 +99,17 @@ func collectServices(protoServices []*protogen.Service) []*rbac.Service {
 					PolicyName:   rules.PolicyName,
 				}
 			}
-
-			if methods := collectMethods(protoService.Methods); len(methods) > 0 {
-				service.Methods = methods
-			}
-
-			if service.Rules == nil && service.Methods == nil {
-				continue
-			}
-
-			services = append(services, &service)
 		}
+
+		if methods := collectMethods(protoService.Methods); len(methods) > 0 {
+			service.Methods = methods
+		}
+
+		if service.Rules == nil && service.Methods == nil {
+			continue
+		}
+
+		services = append(services, &service)
 	}
 
 	return services
@@ -117,7 +117,7 @@ func collectServices(protoServices []*protogen.Service) []*rbac.Service {
 
 func collectMethods(protoMethods []*protogen.Method) map[string]*rbac.Method {
 	methods := make(map[string]*rbac.Method)
-	
+
 	for _, protoMethod := range protoMethods {
 		if options := protoMethod.Desc.Options().(*descriptorpb.MethodOptions); options != nil {
 			if protoMethodRules := proto.GetExtension(options, desc.E_MethodRules).(*desc.Rules); protoMethodRules != nil {
