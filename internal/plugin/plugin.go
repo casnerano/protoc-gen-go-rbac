@@ -1,4 +1,4 @@
-package main
+package plugin
 
 import (
 	"embed"
@@ -40,7 +40,7 @@ type File struct {
 	Source  string
 }
 
-func execute(plugin *protogen.Plugin) error {
+func Execute(plugin *protogen.Plugin) error {
 	tmpl, err := parseTemplate()
 	if err != nil {
 		return err
