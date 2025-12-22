@@ -88,18 +88,27 @@ func collectServices(protoServices []*protogen.Service) []*rbac.Service {
 	var services []*rbac.Service
 	for _, protoService := range protoServices {
 		if options := protoService.Desc.Options().(*descriptorpb.ServiceOptions); options != nil {
-			serviceRules := proto.GetExtension(options, desc.E_ServiceRules).(*desc.Rules)
-			methods := collectMethods(protoService.Methods)
+			service := rbac.Service{
+				Name: string(protoService.Desc.Name()),
+			}
 
-			if serviceRules != nil && len(methods) == 0 {
+			if rules := proto.GetExtension(options, desc.E_ServiceRules).(*desc.Rules); rules != nil {
+				service.Rules = &rbac.Rules{
+					AccessLevel:  rbac.AccessLevel(rules.AccessLevel),
+					AllowedRoles: rules.AllowedRoles,
+					PolicyName:   rules.PolicyName,
+				}
+			}
+
+			if methods := collectMethods(protoService.Methods); len(methods) > 0 {
+				service.Methods = methods
+			}
+
+			if service.Rules == nil && service.Methods == nil {
 				continue
 			}
 
-			services = append(services, &rbac.Service{
-				Name:    string(protoService.Desc.Name()),
-				Rules:   serviceRules,
-				Methods: methods,
-			})
+			services = append(services, &service)
 		}
 	}
 
@@ -108,12 +117,16 @@ func collectServices(protoServices []*protogen.Service) []*rbac.Service {
 
 func collectMethods(protoMethods []*protogen.Method) map[string]*rbac.Method {
 	methods := make(map[string]*rbac.Method)
-
+	
 	for _, protoMethod := range protoMethods {
 		if options := protoMethod.Desc.Options().(*descriptorpb.MethodOptions); options != nil {
-			if methodRules := proto.GetExtension(options, desc.E_MethodRules).(*desc.Rules); methodRules != nil {
+			if protoMethodRules := proto.GetExtension(options, desc.E_MethodRules).(*desc.Rules); protoMethodRules != nil {
 				methods[string(protoMethod.Desc.Name())] = &rbac.Method{
-					Rules: methodRules,
+					Rules: &rbac.Rules{
+						AccessLevel:  rbac.AccessLevel(protoMethodRules.AccessLevel),
+						AllowedRoles: protoMethodRules.AllowedRoles,
+						PolicyName:   protoMethodRules.PolicyName,
+					},
 				}
 			}
 		}

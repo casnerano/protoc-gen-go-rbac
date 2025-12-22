@@ -3,19 +3,7 @@ package rbac
 import (
 	"path"
 	"strings"
-
-	desc "github.com/casnerano/protoc-gen-go-rbac/proto"
 )
-
-type Service struct {
-	Name    string
-	Rules   *desc.Rules
-	Methods map[string]*Method
-}
-
-type Method struct {
-	Rules *desc.Rules
-}
 
 func CheckAccess(service *Service, fullMethod string, roles []string) bool {
 	if method, exists := service.Methods[path.Base(fullMethod)]; exists {
@@ -24,11 +12,11 @@ func CheckAccess(service *Service, fullMethod string, roles []string) bool {
 	return hasRolesAccess(service.Rules, roles)
 }
 
-func hasRolesAccess(rules *desc.Rules, roles []string) bool {
+func hasRolesAccess(rules *Rules, roles []string) bool {
 	switch rules.AccessLevel {
-	case desc.AccessLevel_ACCESS_LEVEL_PUBLIC:
+	case AccessLevelPublic:
 		return true
-	case desc.AccessLevel_ACCESS_LEVEL_PRIVATE:
+	case AccessLevelPrivate:
 		for _, role := range roles {
 			role = strings.ToLower(role)
 			for _, allowed := range rules.AllowedRoles {

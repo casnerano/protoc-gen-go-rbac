@@ -8,17 +8,16 @@ package pb
 
 import (
 	"github.com/casnerano/protoc-gen-go-rbac/pkg/rbac"
-	desc "github.com/casnerano/protoc-gen-go-rbac/proto"
 )
 
 var rbacExampleServiceOne = rbac.Service{
-	Rules: &desc.Rules{
-		AccessLevel: desc.AccessLevel_ACCESS_LEVEL_PUBLIC,
+	Rules: &rbac.Rules{
+		AccessLevel: 1,
 	},
 	Methods: map[string]*rbac.Method{
 		"Update": {
-			Rules: &desc.Rules{
-				AccessLevel: desc.AccessLevel_ACCESS_LEVEL_PRIVATE,
+			Rules: &rbac.Rules{
+				AccessLevel: 3,
 				AllowedRoles: []string{
 					"manager",
 					"director",

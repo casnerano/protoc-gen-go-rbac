@@ -8,20 +8,19 @@ package {{ .File.Package }}
 
 import (
     "github.com/casnerano/protoc-gen-go-rbac/pkg/rbac"
-    desc "github.com/casnerano/protoc-gen-go-rbac/proto"
 )
 
 {{- range .Services }}
     var rbac{{ .Name }} = rbac.Service{
         {{- if .Rules }}
-            Rules: &desc.Rules{
-                AccessLevel: desc.AccessLevel_{{ .Rules.AccessLevel }},
+            Rules: &rbac.Rules{
+                AccessLevel: {{ .Rules.AccessLevel }},
                 {{- if .Rules.AllowedRoles }}
-                AllowedRoles: []string{
-                    {{- range $i, $role := .Rules.AllowedRoles }}
-                    "{{ $role | toLower }}",
-                    {{- end }}
-                },
+                    AllowedRoles: []string{
+                        {{- range $i, $role := .Rules.AllowedRoles }}
+                        "{{ $role | toLower }}",
+                        {{- end }}
+                    },
                 {{- end }}
             },
         {{- else }}
@@ -30,14 +29,14 @@ import (
         Methods: map[string]*rbac.Method{
             {{- range $name, $method := .Methods }}
             "{{ $name }}": {
-                Rules: &desc.Rules{
-                    AccessLevel: desc.AccessLevel_{{ $method.Rules.AccessLevel }},
+                Rules: &rbac.Rules{
+                    AccessLevel: {{ $method.Rules.AccessLevel }},
                     {{- if $method.Rules.AllowedRoles }}
-                    AllowedRoles: []string{
-                        {{- range $j, $role := $method.Rules.AllowedRoles }}
-                        "{{ $role | toLower }}",
-                        {{- end }}
-                    },
+                        AllowedRoles: []string{
+                            {{- range $j, $role := $method.Rules.AllowedRoles }}
+                            "{{ $role | toLower }}",
+                            {{- end }}
+                        },
                     {{- end }}
                 },
             },
