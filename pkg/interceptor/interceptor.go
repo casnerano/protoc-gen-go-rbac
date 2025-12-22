@@ -40,7 +40,7 @@ func RolesAccessor(roleGetter roleGetter, opts ...Option) grpc.UnaryServerInterc
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
 		if rbacOptions.debug {
-			slog.WarnContext(ctx, "RBAC: interceptor invoked",
+			slog.DebugContext(ctx, "RBAC: interceptor invoked",
 				slog.String("method", info.FullMethod),
 				slog.Any("user_roles", roleGetter.Roles()),
 			)
@@ -51,7 +51,7 @@ func RolesAccessor(roleGetter roleGetter, opts ...Option) grpc.UnaryServerInterc
 			hasAccess := v.CheckAccess(info.FullMethod, roleGetter.Roles())
 
 			if rbacOptions.debug {
-				slog.WarnContext(ctx, "RBAC: the rules for the method access",
+				slog.DebugContext(ctx, "RBAC: the rules for the method access",
 					slog.Bool("has_access", hasAccess),
 				)
 			}
@@ -62,7 +62,7 @@ func RolesAccessor(roleGetter roleGetter, opts ...Option) grpc.UnaryServerInterc
 		}
 
 		if rbacOptions.debug {
-			slog.WarnContext(ctx, "RBAC: rules for the method are not defined")
+			slog.DebugContext(ctx, "RBAC: rules for the method are not defined")
 		}
 
 		return nil, status.Error(codes.PermissionDenied, msgAccessDenied)
