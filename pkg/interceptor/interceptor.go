@@ -2,6 +2,7 @@ package interceptor
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"google.golang.org/grpc"
@@ -11,44 +12,42 @@ import (
 
 const msgAccessDenied = "access denied"
 
+var ErrRoleExtractor = errors.New("failed role extractor")
+
 type checkable interface {
 	CheckAccess(fullMethod string, roles []string) bool
 }
 
-type roleGetter interface {
-	Roles() []string
+type AuthContext struct {
+	Authenticated bool
+	Roles         []string
 }
 
-type options struct {
-	debug bool
-}
+type AuthContextResolver func(ctx context.Context) (*AuthContext, error)
 
-type Option func(*options)
-
-func WithDebug() Option {
-	return func(options *options) {
-		options.debug = true
-	}
-}
-
-func RolesAccessor(roleGetter roleGetter, opts ...Option) grpc.UnaryServerInterceptor {
+func RolesAccessor(authContextResolver AuthContextResolver, opts ...Option) grpc.UnaryServerInterceptor {
 	rbacOptions := &options{}
 
 	for _, opt := range opts {
 		opt(rbacOptions)
 	}
 
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+		authContext, err := authContextResolver(ctx)
+		if err != nil {
+			return nil, errors.Join(ErrRoleExtractor, err)
+		}
+
 		if rbacOptions.debug {
 			slog.DebugContext(ctx, "RBAC: interceptor invoked",
 				slog.String("method", info.FullMethod),
-				slog.Any("user_roles", roleGetter.Roles()),
+				slog.Any("user_roles", authContext.Roles),
 			)
 		}
 
 		switch v := info.Server.(type) {
 		case checkable:
-			hasAccess := v.CheckAccess(info.FullMethod, roleGetter.Roles())
+			hasAccess := v.CheckAccess(info.FullMethod, authContext.Roles)
 
 			if rbacOptions.debug {
 				slog.DebugContext(ctx, "RBAC: the rules for the method access",
