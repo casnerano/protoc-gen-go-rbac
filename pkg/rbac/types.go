@@ -7,7 +7,7 @@ const (
 	AccessLevelPublic
 	AccessLevelAuthenticated
 	AccessLevelPrivate
-	AccessLevelPolity
+	AccessLevelPolicy
 )
 
 type Rules struct {
