@@ -1,23 +1,18 @@
 package interceptor
 
-import "context"
-
 type options struct {
-	debug bool
+	debug    bool
+	policies Policies
 }
 
 type Option func(*options)
 
 func WithDebug() Option {
-	return func(options *options) {
-		options.debug = true
+	return func(o *options) {
+		o.debug = true
 	}
 }
 
-type Authenticator func(ctx context.Context) (bool, error)
-
-func WithAuthentification() Option {
-	return func(o *options) {
-
-	}
+func WithPolicies(policies Policies) Option {
+	return func(o *options) { o.policies = policies }
 }

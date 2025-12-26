@@ -11,7 +11,7 @@ import (
 )
 
 {{- range .Services }}
-    var rbac{{ .Name }} = rbac.Service{
+    var rbacService_{{ .Name }} = rbac.Service{
         Name: "{{ .Name }}",
         {{- if .Rules }}
             Rules: &rbac.Rules{
@@ -45,8 +45,8 @@ import (
         },
     }
 
-    func (Unimplemented{{ .Name }}Server) CheckAccess(fullMethod string, roles []string) bool {
-        return rbac.CheckAccess(&rbac{{ .Name }}, fullMethod, roles)
+    func (Unimplemented{{ .Name }}Server) GetRBACService() *rbac.Service {
+        return &rbacService_{{ .Name }}
     }
 {{- end }}
 

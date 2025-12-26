@@ -10,13 +10,13 @@ import (
 	"github.com/casnerano/protoc-gen-go-rbac/pkg/rbac"
 )
 
-var rbacExampleServiceOne = rbac.Service{
+var rbacService_ExampleServiceOne = rbac.Service{
 	Name: "ExampleServiceOne",
 	Rules: &rbac.Rules{
 		AccessLevel: 1,
 	},
 	Methods: map[string]*rbac.Method{
-		"Update": {
+		"example.ExampleServiceOne.Update": {
 			Rules: &rbac.Rules{
 				AccessLevel: 3,
 				AllowedRoles: []string{
@@ -28,6 +28,6 @@ var rbacExampleServiceOne = rbac.Service{
 	},
 }
 
-func (UnimplementedExampleServiceOneServer) CheckAccess(fullMethod string, roles []string) bool {
-	return rbac.CheckAccess(&rbacExampleServiceOne, fullMethod, roles)
+func (UnimplementedExampleServiceOneServer) GetRBACService() *rbac.Service {
+	return &rbacService_ExampleServiceOne
 }
