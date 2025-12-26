@@ -3,6 +3,7 @@ package interceptor
 import (
 	"context"
 	"fmt"
+	"path"
 
 	"github.com/casnerano/protoc-gen-go-rbac/pkg/rbac"
 	"google.golang.org/grpc"
@@ -41,6 +42,7 @@ func RbacUnary(authContextResolver AuthContextResolver, opts ...Option) grpc.Una
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 		if provider, ok := info.Server.(rbacServiceProvider); ok {
+			_ = provider.GetRBACService()
 			rules := findRulesForService(provider.GetRBACService(), info.FullMethod)
 
 			if rules == nil {
@@ -78,7 +80,7 @@ func findRulesForService(service *rbac.Service, fullMethod string) *rbac.Rules {
 		return nil
 	}
 
-	if method, exists := service.Methods[fullMethod]; exists && method.Rules != nil {
+	if method, exists := service.Methods[path.Base(fullMethod)]; exists && method.Rules != nil {
 		return method.Rules
 	}
 

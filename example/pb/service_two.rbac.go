@@ -26,7 +26,7 @@ var rbacService_ExampleServiceThree = rbac.Service{
 	Name:  "ExampleServiceThree",
 	Rules: nil,
 	Methods: map[string]*rbac.Method{
-		"example.ExampleServiceThree.Stats": {
+		"Stats": {
 			Rules: &rbac.Rules{
 				AccessLevel: 3,
 				AllowedRoles: []string{

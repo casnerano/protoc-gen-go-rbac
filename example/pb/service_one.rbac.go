@@ -16,7 +16,7 @@ var rbacService_ExampleServiceOne = rbac.Service{
 		AccessLevel: 1,
 	},
 	Methods: map[string]*rbac.Method{
-		"example.ExampleServiceOne.Update": {
+		"Update": {
 			Rules: &rbac.Rules{
 				AccessLevel: 3,
 				AllowedRoles: []string{

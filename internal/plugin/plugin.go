@@ -121,7 +121,7 @@ func collectMethods(protoMethods []*protogen.Method) map[string]*rbac.Method {
 	for _, protoMethod := range protoMethods {
 		if options := protoMethod.Desc.Options().(*descriptorpb.MethodOptions); options != nil {
 			if protoMethodRules := proto.GetExtension(options, desc.E_MethodRules).(*desc.Rules); protoMethodRules != nil {
-				methods[string(protoMethod.Desc.FullName())] = &rbac.Method{
+				methods[string(protoMethod.Desc.Name())] = &rbac.Method{
 					Rules: &rbac.Rules{
 						AccessLevel:  rbac.AccessLevel(protoMethodRules.AccessLevel),
 						AllowedRoles: protoMethodRules.AllowedRoles,
